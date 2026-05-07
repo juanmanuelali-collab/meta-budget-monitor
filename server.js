@@ -17,7 +17,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'docta2024';
 const FROM_EMAIL     = process.env.FROM_EMAIL     || 'reportes@doctanexus.com';
 const FROM_NAME      = process.env.FROM_NAME      || 'Meta Budget Monitor · Docta Nexus';
 const SUPA_URL       = process.env.SUPABASE_URL;
-const SUPA_KEY       = process.env.SUPABASE_ANON_KEY;
+const SUPA_KEY       = process.env.SUPABASE_SERVICE_KEY;
 const TZ             = 'America/Argentina/Buenos_Aires';
 
 const resend = new Resend(RESEND_KEY);
