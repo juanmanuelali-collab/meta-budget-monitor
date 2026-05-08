@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Meta Budget Monitor — Docta Nexus</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080810;--s1:#0e0e18;--s2:#141420;--s3:#1a1a28;--s4:#222234;
+  --border:#252538;--border2:#30304a;
+  --text:#edeef8;--muted:#6b6b88;--muted2:#44445a;
+  --brand:#c8f135;--brand2:#b0d820;--brand-dim:rgba(200,241,53,.07);--btntxt:#080810;
+  --danger:#f26d6d;--danger-dim:rgba(242,109,109,.1);--danger-border:rgba(242,109,109,.25);
+  --amber:#f5a623;--amber-dim:rgba(245,166,35,.1);--amber-border:rgba(245,166,35,.25);
+  --success:#5de8a0;--success-dim:rgba(93,232,160,.1);--success-border:rgba(93,232,160,.2);
+  --blue:#60a5fa;--blue-dim:rgba(96,165,250,.1);--blue-border:rgba(96,165,250,.2);
+  --purple:#a78bfa;--purple-dim:rgba(167,139,250,.1);
+  --r:10px;--rlg:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;min-height:100vh}
+
+/* ── LOGIN ── */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(200,241,53,.06) 0%,transparent 70%)}
+.login-card{background:var(--s1);border:1px solid var(--border2);border-radius:var(--rlg);padding:2.5rem;width:100%;max-width:360px;box-shadow:0 24px 80px rgba(0,0,0,.6)}
+.login-logo{font-size:1.4rem;font-weight:800;letter-spacing:-.03em;margin-bottom:.2rem}.login-logo span{color:var(--brand)}
+.login-sub{font-size:12px;color:var(--muted);margin-bottom:2rem}
+.lerr{color:var(--danger);font-size:13px;margin-top:.5rem;display:none}
+
+/* ── LAYOUT ── */
+.app{display:none;min-height:100vh}
+.sidebar{width:224px;background:var(--s1);border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;z-index:20}
+.sb-head{padding:1.25rem 1.1rem .9rem;border-bottom:1px solid var(--border)}
+.sb-logo{font-size:1rem;font-weight:800;letter-spacing:-.03em}.sb-logo span{color:var(--brand)}
+.sb-sub{font-size:9px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.1em}
+.nav{padding:.5rem 0;flex:1;overflow-y:auto}
+.nav-sep{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted2);padding:.6rem 1.1rem .2rem}
+.nav-btn{display:flex;align-items:center;gap:9px;padding:8px 1.1rem;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;border:none;background:none;width:100%;text-align:left}
+.nav-btn:hover{color:var(--text);background:var(--s2)}
+.nav-btn.on{color:var(--brand);background:var(--brand-dim);font-weight:600;border-left:2px solid var(--brand)}
+.nav-btn .ico{width:16px;text-align:center;flex-shrink:0}
+.sb-foot{padding:.85rem 1.1rem;border-top:1px solid var(--border);font-size:11px;color:var(--muted2)}
+.sb-foot a{color:var(--muted);text-decoration:none}.sb-foot a:hover{color:var(--brand)}
+.main{margin-left:224px;min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:var(--s1);border-bottom:1px solid var(--border);padding:.85rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.topbar-left{font-size:1rem;font-weight:700}
+.topbar-right{display:flex;gap:8px;align-items:center}
+.content{padding:1.5rem;flex:1}
+.page{display:none}.page.on{display:block}
+
+/* ── FORMS ── */
+input,select,textarea{background:var(--s2);border:1.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:9px 12px;outline:none;width:100%;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--brand)}
+textarea{resize:vertical;min-height:60px}
+.flabel{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);display:block;margin-bottom:5px}
+.fg{margin-bottom:.9rem}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.frow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.tip{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.6}
+.fsep{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted2);padding:.7rem 0 .4rem;border-top:1px solid var(--border);margin-top:.4rem}
+
+/* ── BUTTONS ── */
+.btn{background:var(--brand);color:var(--btntxt);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:800;padding:10px 16px;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{background:var(--brand2);transform:translateY(-1px)}
+.btn-sm{padding:6px 12px;font-size:12px;font-weight:700}
+.btn-xs{padding:4px 9px;font-size:11px;font-weight:700}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;padding:10px 16px;border-radius:8px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-ghost:hover{color:var(--text);background:var(--s2)}
+.btn-danger{background:var(--danger-dim);border:1px solid var(--danger-border);color:var(--danger);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;padding:7px 13px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.btn-danger:hover{background:var(--danger);color:#fff}
+.btn-out{background:transparent;border:1.5px solid var(--brand);color:var(--brand);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;padding:7px 13px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s}
+.btn-out:hover{background:var(--brand);color:var(--btntxt)}
+
+/* ── CARDS ── */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:1.2rem}
+.card+.card{margin-top:.85rem}
+.card-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.9rem}
+.divider{height:1px;background:var(--border);margin:1.1rem 0}
+
+/* ── CLIENT ROW ── */
+.client-row{
+  padding:1.25rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  transition:background .15s;
+  position:relative;
+}
+.client-row:last-child{border-bottom:none}
+.client-row::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:0 2px 2px 0;
+  transition:background .2s;
+}
+.client-row.status-ok::before{background:var(--success)}
+.client-row.status-warn::before{background:var(--amber)}
+.client-row.status-danger::before{background:var(--danger)}
+.client-row.status-blue::before{background:var(--blue)}
+.client-row:hover{background:var(--s2)}
+
+.cr-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
+.cr-name-block{}
+.cr-name{font-weight:700;font-size:1.05rem;margin-bottom:4px}
+.cr-account{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
+.cr-badges{display:flex;gap:5px;align-items:center;margin-top:5px;flex-wrap:wrap}
+
+.cr-health{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-width:72px;padding:8px 14px;border-radius:10px;border:1px solid var(--border2);
+  background:var(--s2);text-align:center;flex-shrink:0;
+}
+.cr-health-score{font-size:1.5rem;font-weight:800;line-height:1;font-family:'DM Mono',monospace}
+.cr-health-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:2px;color:var(--muted)}
+
+/* ── METRICS GRID ── */
+.cr-metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:1rem}
+.cr-met{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:9px 11px}
+.cr-met-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:3px}
+.cr-met-val{font-size:1.1rem;font-weight:800;font-family:'DM Mono',monospace}
+.cr-met-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.cr-met-delta{font-size:10px;font-weight:700;margin-top:2px}
+.delta-up-good{color:var(--success)}.delta-up-bad{color:var(--danger)}
+.delta-down-good{color:var(--success)}.delta-down-bad{color:var(--danger)}
+
+/* ── PACING & BARS ── */
+.cr-pacing{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:1rem}
+.cr-pacing-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cr-pacing-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.cr-pacing-deviation{font-size:12px;font-weight:800}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.bar-label{font-size:10px;font-weight:700;color:var(--muted);min-width:38px;text-align:right;font-family:'DM Mono',monospace}
+.bar-track{flex:1;height:7px;background:var(--s3);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+.bar-pct{font-size:10px;font-weight:800;min-width:34px;font-family:'DM Mono',monospace}
+.pacing-info{display:flex;gap:1rem;margin-top:6px;flex-wrap:wrap}
+.pacing-info-item{font-size:11px;color:var(--muted)}
+.pacing-info-item span{font-weight:700;color:var(--text)}
+
+/* ── SPARKLINE ── */
+.cr-sparkline{margin-bottom:1rem}
+.sparkline-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px}
+.sparkline-svg{width:100%;height:40px;display:block}
+
+/* ── FORECAST ── */
+.cr-forecast{background:var(--purple-dim);border:1px solid rgba(167,139,250,.2);border-radius:8px;padding:10px 12px;margin-bottom:1rem}
+.cr-forecast-head{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--purple);margin-bottom:6px}
+.cr-forecast-grid{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:6px}
+.cr-forecast-item{}
+.cr-forecast-val{font-size:1rem;font-weight:800;font-family:'DM Mono',monospace;color:var(--text)}
+.cr-forecast-sub{font-size:10px;color:var(--muted)}
+.cr-forecast-insight{font-size:12px;color:var(--text);line-height:1.5;border-top:1px solid rgba(167,139,250,.15);padding-top:6px;margin-top:4px}
+.cr-forecast-rec{font-size:11px;color:var(--purple);margin-top:3px;font-style:italic}
+
+/* ── OBJETIVOS ── */
+.cr-goals{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem}
+.cr-goal{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 11px;flex:1;min-width:100px}
+.cr-goal-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:3px}
+.cr-goal-row{display:flex;align-items:baseline;gap:5px}
+.cr-goal-actual{font-size:1rem;font-weight:800;font-family:'DM Mono',monospace}
+.cr-goal-target{font-size:10px;color:var(--muted)}
+.cr-goal-trend{font-size:10px;font-weight:700;margin-top:2px}
+
+/* ── COMPARATIVAS ── */
+.cr-compare{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:6px;margin-bottom:1rem}
+.cr-cmp{background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:7px 9px}
+.cr-cmp-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:3px}
+.cr-cmp-val{font-size:.95rem;font-weight:800;font-family:'DM Mono',monospace}
+.cr-cmp-delta{font-size:10px;font-weight:700;margin-top:1px}
+
+/* ── ALERTAS ── */
+.cr-alerts{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:1rem}
+.alert-item{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;font-size:12px;font-weight:600}
+.alert-critical{background:var(--danger-dim);border:1px solid var(--danger-border);color:var(--danger)}
+.alert-warning{background:var(--amber-dim);border:1px solid var(--amber-border);color:var(--amber)}
+
+/* ── ACCIONES ── */
+.cr-actions{display:flex;gap:6px;align-items:center;margin-top:.25rem}
+
+/* ── BADGES ── */
+.badge{font-size:9px;font-weight:800;padding:3px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.04em;display:inline-block}
+.badge-ok{background:var(--success-dim);border:1px solid var(--success-border);color:var(--success)}
+.badge-warn{background:var(--amber-dim);border:1px solid var(--amber-border);color:var(--amber)}
+.badge-danger{background:var(--danger-dim);border:1px solid var(--danger-border);color:var(--danger)}
+.badge-off{background:var(--s3);border:1px solid var(--border2);color:var(--muted)}
+.badge-blue{background:var(--blue-dim);border:1px solid var(--blue-border);color:var(--blue)}
+.badge-purple{background:var(--purple-dim);border:1px solid rgba(167,139,250,.2);color:var(--purple)}
+
+/* ── TABLE ── */
+.htable{width:100%;border-collapse:collapse;font-size:13px}
+.htable th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:9px 12px;text-align:left;border-bottom:1px solid var(--border)}
+.htable td{padding:11px 12px;border-bottom:1px solid var(--border)}
+.htable tr:last-child td{border-bottom:none}
+.htable tr:hover td{background:var(--s2)}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:1rem;overflow-y:auto;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-bg.on{opacity:1;pointer-events:all}
+.modal{background:var(--s1);border:1px solid var(--border2);border-radius:var(--rlg);width:100%;max-width:580px;margin:auto}
+.modal-hd{padding:1rem 1.3rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--s1);z-index:1}
+.modal-hd h2{font-size:1rem;font-weight:700}
+.modal-bd{padding:1.3rem}
+.modal-ft{padding:.9rem 1.3rem;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+
+/* ── EMAIL TAGS ── */
+.etags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.etag{display:inline-flex;align-items:center;gap:5px;background:var(--s2);border:1px solid var(--border2);border-radius:6px;padding:3px 9px;font-size:12px}
+.etag button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0;line-height:1}
+.etag button:hover{color:var(--danger)}
+
+/* ── TOGGLE ── */
+.toggle{width:34px;height:18px;background:var(--border2);border-radius:9px;position:relative;cursor:pointer;transition:background .18s;flex-shrink:0;border:none}
+.toggle.on{background:var(--brand)}
+.toggle::after{content:'';position:absolute;width:12px;height:12px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform .18s}
+.toggle.on::after{transform:translateX(16px)}
+
+/* ── SCHEDULE ── */
+.sched-section{background:var(--s2);border:1px solid var(--border2);border-radius:var(--r);padding:1.1rem;margin-bottom:.75rem}
+.sched-row{display:flex;align-items:center;gap:10px;margin-bottom:.75rem}
+.sched-row:last-child{margin-bottom:0}
+.sched-lbl{font-size:12px;color:var(--muted);font-weight:600;min-width:80px;flex-shrink:0}
+.sched-select{flex:1;background:var(--s1);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;color:var(--text);font-size:13px;width:auto}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--s1);border:1px solid var(--border2);border-radius:var(--r);padding:11px 16px;font-size:14px;font-weight:600;z-index:300;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;max-width:320px}
+.toast.on{opacity:1;transform:translateY(0)}
+.toast.ok{border-color:rgba(93,232,160,.4);color:var(--success)}
+.toast.err{border-color:rgba(242,109,109,.4);color:var(--danger)}
+.toast.info{border-color:rgba(200,241,53,.4);color:var(--brand)}
+
+/* ── MISC ── */
+.spin{width:15px;height:15px;border:2px solid var(--border2);border-top-color:var(--brand);border-radius:50%;animation:spin .6s linear infinite;display:inline-block;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:3.5rem 2rem;color:var(--muted)}
+.empty-ico{font-size:2.5rem;margin-bottom:.8rem;opacity:.5}
+.empty p{font-size:14px;line-height:1.8}
+.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;flex-wrap:wrap;gap:8px}
+.sec-title{font-size:1.05rem;font-weight:700}
+.sec-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.clients-wrap{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <div class="login-logo">Meta<span>Budget</span></div>
+    <div class="login-sub">Monitor de presupuestos · Docta Nexus</div>
+    <div class="fg"><label class="flabel">Contraseña</label>
+      <input type="password" id="loginPwd" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn" style="width:100%" onclick="doLogin()">Ingresar</button>
+    <div class="lerr" id="loginErr">Contraseña incorrecta</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+  <div class="sidebar">
+    <div class="sb-head">
+      <div class="sb-logo">Meta<span>Budget</span></div>
+      <div class="sb-sub">Monitor · Docta Nexus</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-sep">Principal</div>
+      <button class="nav-btn on" onclick="goTo('dashboard',this)"><span class="ico">📊</span> Dashboard</button>
+      <button class="nav-btn" onclick="goTo('clients',this)"><span class="ico">👥</span> Clientes</button>
+      <div class="nav-sep">Configuración</div>
+      <button class="nav-btn" onclick="goTo('settings',this)"><span class="ico">⚙️</span> Ajustes</button>
+      <button class="nav-btn" onclick="goTo('history',this)"><span class="ico">📋</span> Historial</button>
+    </nav>
+    <div class="sb-foot">
+      <div style="margin-bottom:8px"><a href="https://doctanexus.com" target="_blank">doctanexus.com</a></div>
+      <div id="sbTime" style="font-size:10px;color:var(--muted2);margin-bottom:10px"></div>
+      <button onclick="doLogout()" style="width:100%;background:var(--danger-dim);border:1px solid var(--danger-border);color:var(--danger);border-radius:7px;padding:7px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">⏻ Cerrar sesión</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left" id="topbarTitle">Dashboard</div>
+      <div class="topbar-right">
+        <span id="topbarSub" style="font-size:12px;color:var(--muted)"></span>
+        <button class="btn btn-sm" id="refreshBtn" onclick="loadDashboard()">↻ Actualizar</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page on" id="page-dashboard">
+        <div id="dashAlerts"></div>
+        <div id="dashClients"></div>
+      </div>
+
+      <!-- CLIENTES -->
+      <div class="page" id="page-clients">
+        <div class="sec-hd">
+          <div><div class="sec-title">Clientes</div><div class="sec-sub">Gestioná las cuentas publicitarias</div></div>
+          <button class="btn btn-sm" onclick="openClientModal()">+ Agregar cliente</button>
+        </div>
+        <div id="clientsList"></div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="page" id="page-settings">
+        <div class="sec-hd">
+          <div><div class="sec-title">Ajustes</div><div class="sec-sub">Configurá el schedule y destinatarios</div></div>
+          <button class="btn btn-sm" onclick="saveSettings()">Guardar cambios</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📧 Destinatarios del reporte consolidado</div>
+          <div class="fg">
+            <label class="flabel">Agregar correo</label>
+            <div style="display:flex;gap:8px">
+              <input type="email" id="emailInput" placeholder="nombre@ejemplo.com" onkeydown="if(event.key==='Enter')addEmail()" style="flex:1">
+              <button class="btn btn-sm" onclick="addEmail()">+ Agregar</button>
+            </div>
+            <div class="etags" id="emailTags"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🕐 Schedule de envío</div>
+          <div class="sched-section">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem">
+              <div><div style="font-size:14px;font-weight:700">Reporte Diario</div><div style="font-size:12px;color:var(--muted)">Consumo de ayer + estado del mes</div></div>
+              <button class="toggle" id="tog-daily" onclick="this.classList.toggle('on')"></button>
+            </div>
+            <div class="sched-row"><span class="sched-lbl">Hora</span><select class="sched-select" id="daily-hour"></select></div>
+          </div>
+          <div class="sched-section">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem">
+              <div><div style="font-size:14px;font-weight:700">Reporte Semanal</div><div style="font-size:12px;color:var(--muted)">Resumen de los últimos 7 días</div></div>
+              <button class="toggle" id="tog-weekly" onclick="this.classList.toggle('on')"></button>
+            </div>
+            <div class="sched-row"><span class="sched-lbl">Día</span>
+              <select class="sched-select" id="weekly-dow">
+                <option value="1">Lunes</option><option value="2">Martes</option><option value="3">Miércoles</option>
+                <option value="4">Jueves</option><option value="5">Viernes</option><option value="6">Sábado</option><option value="0">Domingo</option>
+              </select>
+            </div>
+            <div class="sched-row"><span class="sched-lbl">Hora</span><select class="sched-select" id="weekly-hour"></select></div>
+          </div>
+          <div class="sched-section">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem">
+              <div><div style="font-size:14px;font-weight:700">Reporte Mensual</div><div style="font-size:12px;color:var(--muted)">Cierre del mes completo</div></div>
+              <button class="toggle" id="tog-monthly" onclick="this.classList.toggle('on')"></button>
+            </div>
+            <div class="sched-row"><span class="sched-lbl">Día del mes</span><select class="sched-select" id="monthly-day"></select></div>
+            <div class="sched-row"><span class="sched-lbl">Hora</span><select class="sched-select" id="monthly-hour"></select></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📤 Envío manual</div>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:1rem">Enviá un reporte ahora a los destinatarios configurados.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn-out btn-sm" onclick="sendTest('daily')">Enviar Diario ahora</button>
+            <button class="btn-out btn-sm" onclick="sendTest('weekly')">Enviar Semanal ahora</button>
+            <button class="btn-out btn-sm" onclick="sendTest('monthly')">Enviar Mensual ahora</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORIAL -->
+      <div class="page" id="page-history">
+        <div class="sec-hd">
+          <div><div class="sec-title">Historial de envíos</div><div class="sec-sub">Últimos reportes consolidados</div></div>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <table class="htable">
+            <thead><tr><th>Fecha y hora</th><th>Tipo</th><th>Clientes</th><th>Alertas</th><th>Destinatarios</th></tr></thead>
+            <tbody id="historyBody"><tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--muted)">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CLIENTE -->
+<div class="modal-bg" id="clientModal">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2 id="modalTitle">Agregar cliente</h2>
+      <button class="btn-ghost btn-xs" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-bd">
+      <input type="hidden" id="editId">
+
+      <div class="fg"><label class="flabel">Nombre del cliente *</label>
+        <input type="text" id="cName" placeholder="ej: Casa de Pedro"></div>
+      <div class="fg"><label class="flabel">Ad Account ID *</label>
+        <input type="text" id="cAccount" placeholder="ej: act_123456789">
+        <div class="tip">Se encuentra en el Administrador de anuncios de Meta</div></div>
+
+      <div class="frow">
+        <div class="fg"><label class="flabel">Presupuesto mensual</label>
+          <input type="number" id="cBudget" placeholder="0" min="0"></div>
+        <div class="fg"><label class="flabel">Moneda</label>
+          <select id="cCurrency">
+            <option value="ARS">ARS — Peso argentino</option>
+            <option value="USD">USD — Dólar</option>
+            <option value="MXN">MXN — Peso mexicano</option>
+            <option value="CLP">CLP — Peso chileno</option>
+            <option value="COP">COP — Peso colombiano</option>
+          </select></div>
+      </div>
+
+      <div class="fg"><label class="flabel">Tipo de cliente</label>
+        <select id="cType" onchange="onTypeChange()">
+          <option value="general">General</option>
+          <option value="ecommerce">eCommerce</option>
+          <option value="leads">Generación de Leads</option>
+        </select></div>
+
+      <div id="goalsEcommerce" style="display:none">
+        <div class="fsep">🎯 Objetivos eCommerce</div>
+        <div class="frow">
+          <div class="fg"><label class="flabel">ROAS objetivo</label>
+            <input type="number" id="cTargetRoas" placeholder="ej: 12" step="0.1" min="0"></div>
+          <div class="fg"><label class="flabel">Ingresos objetivo (mes)</label>
+            <input type="number" id="cTargetRevenue" placeholder="0" min="0"></div>
+        </div>
+      </div>
+
+      <div id="goalsLeads" style="display:none">
+        <div class="fsep">🎯 Objetivos Leads</div>
+        <div class="frow">
+          <div class="fg"><label class="flabel">CPL objetivo</label>
+            <input type="number" id="cTargetCpl" placeholder="ej: 5000" min="0"></div>
+          <div class="fg"><label class="flabel">Leads objetivo (mes)</label>
+            <input type="number" id="cTargetLeads" placeholder="ej: 200" min="0"></div>
+        </div>
+      </div>
+
+      <div class="fg"><label class="flabel">Notas internas</label>
+        <textarea id="cNotes" placeholder="Observaciones, contexto del cliente..."></textarea></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="toggle on" id="cActive" onclick="this.classList.toggle('on')"></button>
+        <span style="font-size:13px;color:var(--muted)">Cliente activo</span>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn" onclick="saveClient()">Guardar cliente</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────────
+let JWT_TOKEN = sessionStorage.getItem('mbm_token') || '';
+let dashData = [];
+let settingsData = {};
+let emailList = [];
+
+// ── API — usa JWT Bearer token ────────────────────────────────
+async function api(method, path, body) {
+  const res = await fetch(path, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': JWT_TOKEN ? 'Bearer ' + JWT_TOKEN : '',
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (res.status === 401) {
+    // Token expirado o inválido — volver al login
+    JWT_TOKEN = '';
+    sessionStorage.removeItem('mbm_token');
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('loginWrap').style.display = 'flex';
+    toast('Sesión expirada, ingresá nuevamente', 'err');
+    return {};
+  }
+  return res.json();
+}
+
+// ── AUTH ──────────────────────────────────────────────────────
+async function doLogin() {
+  const pwd = document.getElementById('loginPwd').value.trim();
+  if (!pwd) return;
+  const r = await fetch('/api/login', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pwd }),
+  }).then(r => r.json());
+  if (r.ok && r.token) {
+    JWT_TOKEN = r.token;
+    sessionStorage.setItem('mbm_token', r.token);
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    loadDashboard();
+    startClock();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+}
+
+function doLogout() {
+  JWT_TOKEN = '';
+  sessionStorage.removeItem('mbm_token');
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginWrap').style.display = 'flex';
+  document.getElementById('loginPwd').value = '';
+  document.getElementById('loginErr').style.display = 'none';
+}
+
+document.getElementById('loginPwd').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+// Auto-login si hay token guardado en sesión
+(async () => {
+  if (!JWT_TOKEN) return;
+  try {
+    const test = await fetch('/api/history', { headers: { 'Authorization': 'Bearer ' + JWT_TOKEN } });
+    if (test.ok) {
+      document.getElementById('loginWrap').style.display = 'none';
+      document.getElementById('app').style.display = 'flex';
+      loadDashboard();
+      startClock();
+    } else {
+      JWT_TOKEN = '';
+      sessionStorage.removeItem('mbm_token');
+    }
+  } catch(e) {
+    JWT_TOKEN = '';
+    sessionStorage.removeItem('mbm_token');
+  }
+})();
+
+// ── NAV ───────────────────────────────────────────────────────
+function goTo(page, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('on'));
+  document.getElementById('page-' + page).classList.add('on');
+  if (btn) btn.classList.add('on');
+  const titles = { dashboard: 'Dashboard', clients: 'Clientes', settings: 'Ajustes', history: 'Historial' };
+  document.getElementById('topbarTitle').textContent = titles[page] || page;
+  document.getElementById('refreshBtn').style.display = page === 'dashboard' ? '' : 'none';
+  if (page === 'history')  loadHistory();
+  if (page === 'settings') loadSettings();
+  if (page === 'clients')  loadClientsList();
+}
+
+function startClock() {
+  const el = document.getElementById('sbTime');
+  const update = () => {
+    el.textContent = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' }) + ' BsAs';
+  };
+  update(); setInterval(update, 30000);
+}
+
+// ── HELPERS ───────────────────────────────────────────────────
+function fmtMoney(val, currency = 'ARS') {
+  if (!val && val !== 0) return '—';
+  const sym = currency === 'USD' ? 'U$S ' : '$ ';
+  return sym + Math.round(val).toLocaleString('es-AR');
+}
+
+function fmtNum(val, decimals = 1) {
+  if (!val && val !== 0) return '—';
+  return val.toFixed(decimals);
+}
+
+function fmtPct(val) {
+  if (!val && val !== 0) return '—';
+  return Math.round(val) + '%';
+}
+
+function delta(now, prev, higherIsBetter = true) {
+  if (!prev || !now) return null;
+  const pct = ((now - prev) / Math.abs(prev)) * 100;
+  const isUp = pct > 0;
+  const isGood = higherIsBetter ? isUp : !isUp;
+  const cls = isUp ? (isGood ? 'delta-up-good' : 'delta-up-bad') : (isGood ? 'delta-down-good' : 'delta-down-bad');
+  const arrow = isUp ? '▲' : '▼';
+  return `<span class="${cls}">${arrow} ${Math.abs(Math.round(pct))}%</span>`;
+}
+
+// ── SPARKLINE ─────────────────────────────────────────────────
+function buildSparkline(dailySpend) {
+  if (!dailySpend || dailySpend.length < 2) return '';
+  const vals = dailySpend.map(d => d.spend);
+  const max  = Math.max(...vals, 1);
+  const min  = Math.min(...vals);
+  const W = 300, H = 40, pad = 2;
+  const points = vals.map((v, i) => {
+    const x = pad + (i / (vals.length - 1)) * (W - pad * 2);
+    const y = H - pad - ((v - min) / (max - min || 1)) * (H - pad * 2);
+    return `${x},${y}`;
+  }).join(' ');
+
+  // Trend color
+  const trend = vals[vals.length - 1] - vals[0];
+  const color = trend > 0 ? 'var(--success)' : trend < 0 ? 'var(--danger)' : 'var(--muted)';
+
+  return `
+  <div class="cr-sparkline">
+    <div class="sparkline-lbl">Gasto diario — últimos ${vals.length} días</div>
+    <svg class="sparkline-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${color}" stop-opacity=".3"/>
+          <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <polyline points="${points}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round"/>
+    </svg>
+  </div>`;
+}
+
+// ── PACING DUAL BAR ───────────────────────────────────────────
+function buildPacingBlock(client, metrics) {
+  const budget      = client.monthly_budget || 0;
+  const spendMonth  = metrics?.month?.spend || 0;
+  const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+  const dayOfMonth  = new Date().getDate();
+  const realPct     = budget > 0 ? Math.min((spendMonth / budget) * 100, 100) : 0;
+  const idealPct    = Math.min((dayOfMonth / daysInMonth) * 100, 100);
+  const deviation   = realPct - idealPct;
+
+  // Colores
+  let devColor, devLabel, statusClass;
+  if (Math.abs(deviation) <= 5) {
+    devColor = 'var(--success)'; devLabel = 'En ritmo ideal'; statusClass = 'ok';
+  } else if (deviation > 20 || deviation < -20) {
+    devColor = 'var(--danger)'; devLabel = deviation > 0 ? 'Sobreinversión' : 'Consumo crítico bajo'; statusClass = 'danger';
+  } else {
+    devColor = 'var(--amber)'; devLabel = deviation > 0 ? 'Ritmo acelerado' : 'Ritmo bajo'; statusClass = 'warn';
+  }
+
+  const realBarColor = realPct >= 100 ? 'var(--danger)' : realPct >= 80 ? 'var(--amber)' : 'var(--success)';
+
+  // Fecha estimada de agotamiento
+  let burnoutHtml = '';
+  if (budget > 0 && spendMonth > 0 && dayOfMonth > 1) {
+    const dailyAvg = spendMonth / (dayOfMonth - 1);
+    if (dailyAvg > 0) {
+      const daysLeft = (budget - spendMonth) / dailyAvg;
+      if (daysLeft <= 0) {
+        burnoutHtml = `<span style="color:var(--danger);font-weight:700;font-size:11px">⚠ Presupuesto agotado</span>`;
+      } else if (daysLeft < daysInMonth - dayOfMonth) {
+        const burnDate = new Date();
+        burnDate.setDate(burnDate.getDate() + Math.round(daysLeft));
+        const dateStr = burnDate.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
+        burnoutHtml = `<span style="color:var(--amber);font-weight:700;font-size:11px">🔥 Se agota ~${dateStr} (${Math.round(daysLeft)} días)</span>`;
+      } else {
+        burnoutHtml = `<span style="color:var(--success);font-size:11px">✓ Presupuesto alcanza todo el mes</span>`;
+      }
+    }
+  }
+
+  if (!budget) return '';
+
+  return `
+  <div class="cr-pacing">
+    <div class="cr-pacing-top">
+      <span class="cr-pacing-title">Pacing presupuestal</span>
+      <span class="cr-pacing-deviation" style="color:${devColor}">${deviation > 0 ? '+' : ''}${Math.round(deviation)}pp — ${devLabel}</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">Real</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${realPct}%;background:${realBarColor}"></div></div>
+      <span class="bar-pct" style="color:${realBarColor}">${Math.round(realPct)}%</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">Ideal</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${idealPct}%;background:var(--muted2)"></div></div>
+      <span class="bar-pct" style="color:var(--muted)">${Math.round(idealPct)}%</span>
+    </div>
+    <div class="pacing-info" style="margin-top:8px">
+      <div class="pacing-info-item">Gastado: <span>${fmtMoney(spendMonth, client.currency)}</span></div>
+      <div class="pacing-info-item">Presupuesto: <span>${fmtMoney(budget, client.currency)}</span></div>
+      <div class="pacing-info-item">Día: <span>${dayOfMonth}/${daysInMonth}</span></div>
+      ${burnoutHtml ? `<div class="pacing-info-item">${burnoutHtml}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+// ── METRICS BLOCK ─────────────────────────────────────────────
+function buildMetricsBlock(client, metrics) {
+  if (!metrics) return '';
+  const type = client.client_type || 'general';
+  const m    = metrics.month || {};
+  const lw   = metrics.lastWeek || {};
+  const pw   = metrics.prevWeek || {};
+  const pm   = metrics.prevMonth || {};
+
+  const metCard = (lbl, val, sub, deltaHtml) => `
+    <div class="cr-met">
+      <div class="cr-met-lbl">${lbl}</div>
+      <div class="cr-met-val">${val}</div>
+      ${sub  ? `<div class="cr-met-sub">${sub}</div>` : ''}
+      ${deltaHtml ? `<div class="cr-met-delta">${deltaHtml}</div>` : ''}
+    </div>`;
+
+  let cards = '';
+  cards += metCard('Gasto ayer', fmtMoney(metrics.yesterday?.spend, client.currency), '', '');
+  cards += metCard('CTR', fmtNum(m.ctr) + '%', 'Click-through rate', delta(lw.ctr, pw.ctr, true) || '');
+  cards += metCard('CPM', fmtMoney(m.cpm, client.currency), 'Costo por mil', delta(lw.cpm, pw.cpm, false) || '');
+  cards += metCard('Frecuencia', fmtNum(m.frequency), 'Veces visto/usuario', '');
+
+  if (type === 'ecommerce') {
+    cards += metCard('ROAS', fmtNum(m.roas), 'Ret. sobre inversión', delta(lw.roas, pw.roas, true) || '');
+    cards += metCard('Ingresos', fmtMoney(m.revenue, client.currency), 'Del mes', delta(lw.revenue, pw.revenue, true) || '');
+    cards += metCard('Compras', m.purchases || '0', 'Conversiones', '');
+    cards += metCard('CPA', fmtMoney(m.cpa, client.currency), 'Costo por compra', delta(lw.cpa, pw.cpa, false) || '');
+  } else if (type === 'leads') {
+    cards += metCard('Leads', m.leads || '0', 'Generados este mes', '');
+    cards += metCard('CPL', fmtMoney(m.cpl, client.currency), 'Costo por lead', delta(lw.cpl, pw.cpl, false) || '');
+  }
+
+  return `<div class="cr-metrics">${cards}</div>`;
+}
+
+// ── COMPARATIVA PERÍODOS ──────────────────────────────────────
+function buildCompareBlock(client, metrics) {
+  if (!metrics) return '';
+  const lw = metrics.lastWeek  || {};
+  const pw = metrics.prevWeek  || {};
+  const pm = metrics.prevMonth || {};
+  const m  = metrics.month     || {};
+
+  const cmpCard = (lbl, val, deltaHtml) => `
+    <div class="cr-cmp">
+      <div class="cr-cmp-lbl">${lbl}</div>
+      <div class="cr-cmp-val">${val}</div>
+      ${deltaHtml ? `<div class="cr-cmp-delta">${deltaHtml}</div>` : '<div class="cr-cmp-delta" style="color:var(--muted2)">—</div>'}
+    </div>`;
+
+  return `
+  <div style="margin-bottom:1rem">
+    <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px">Variación vs semana anterior</div>
+    <div class="cr-compare">
+      ${cmpCard('CPM', fmtMoney(lw.cpm, client.currency), delta(lw.cpm, pw.cpm, false))}
+      ${cmpCard('CTR', fmtNum(lw.ctr) + '%', delta(lw.ctr, pw.ctr, true))}
+      ${client.client_type === 'ecommerce' ? cmpCard('ROAS', fmtNum(lw.roas), delta(lw.roas, pw.roas, true)) : ''}
+      ${client.client_type === 'leads' ? cmpCard('CPL', fmtMoney(lw.cpl, client.currency), delta(lw.cpl, pw.cpl, false)) : ''}
+      ${cmpCard('Gasto', fmtMoney(lw.spend, client.currency), delta(lw.spend, pw.spend, true))}
+    </div>
+  </div>`;
+}
+
+// ── OBJETIVOS ─────────────────────────────────────────────────
+function buildGoalsBlock(client, metrics) {
+  if (!metrics || !client.client_type || client.client_type === 'general') return '';
+  const m    = metrics.month || {};
+  const lw   = metrics.lastWeek || {};
+  const pw   = metrics.prevWeek || {};
+  const type = client.client_type;
+
+  const goalCard = (lbl, actual, target, currency, higherIsBetter) => {
+    if (!target) return '';
+    const ratio = higherIsBetter ? (actual / target) : (target / actual);
+    const pct   = ratio * 100;
+    let color    = pct >= 100 ? 'var(--success)' : pct >= 80 ? 'var(--amber)' : 'var(--danger)';
+    const trendD = delta(lw[lbl.toLowerCase()], pw[lbl.toLowerCase()], higherIsBetter);
+    return `
+    <div class="cr-goal">
+      <div class="cr-goal-lbl">${lbl}</div>
+      <div class="cr-goal-row">
+        <span class="cr-goal-actual" style="color:${color}">${currency ? fmtMoney(actual, client.currency) : fmtNum(actual)}</span>
+        <span class="cr-goal-target">/ ${currency ? fmtMoney(target, client.currency) : fmtNum(target)} obj.</span>
+      </div>
+      <div class="cr-goal-trend" style="color:${color}">${Math.round(pct)}% del objetivo ${trendD || ''}</div>
+    </div>`;
+  };
+
+  let html = '';
+  if (type === 'ecommerce') {
+    html += goalCard('ROAS', m.roas || 0, client.target_roas, false, true);
+    html += goalCard('Ingresos', m.revenue || 0, client.target_revenue, true, true);
+  } else if (type === 'leads') {
+    html += goalCard('CPL', m.cpl || 0, client.target_cpl, true, false);
+    html += goalCard('Leads', m.leads || 0, client.target_leads, false, true);
+  }
+
+  if (!html) return '';
+  return `
+  <div style="margin-bottom:1rem">
+    <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px">Objetivos del mes</div>
+    <div class="cr-goals">${html}</div>
+  </div>`;
+}
+
+// ── FORECAST ─────────────────────────────────────────────────
+function buildForecastBlock(forecast, client) {
+  if (!forecast) return '';
+  const type       = client.client_type || 'general';
+  const metricaLbl = type === 'ecommerce' ? 'ROAS esperado' : type === 'leads' ? 'CPL esperado' : '';
+
+  return `
+  <div class="cr-forecast">
+    <div class="cr-forecast-head">🤖 Forecast IA — Proyección fin de mes</div>
+    <div class="cr-forecast-grid">
+      <div class="cr-forecast-item">
+        <div class="cr-forecast-val">${fmtMoney(forecast.gastoEsperado, client.currency)}</div>
+        <div class="cr-forecast-sub">Gasto proyectado</div>
+      </div>
+      ${forecast.metricaEsperada && metricaLbl ? `
+      <div class="cr-forecast-item">
+        <div class="cr-forecast-val">${type === 'leads' ? fmtMoney(forecast.metricaEsperada, client.currency) : fmtNum(forecast.metricaEsperada)}</div>
+        <div class="cr-forecast-sub">${metricaLbl}</div>
+      </div>` : ''}
+    </div>
+    ${forecast.insight ? `<div class="cr-forecast-insight">${forecast.insight}</div>` : ''}
+    ${forecast.recomendacion ? `<div class="cr-forecast-rec">→ ${forecast.recomendacion}</div>` : ''}
+  </div>`;
+}
+
+// ── HEALTH SCORE ──────────────────────────────────────────────
+function buildHealthBadge(health) {
+  if (!health) return '<div class="cr-health"><span class="cr-health-score" style="color:var(--muted)">—</span><span class="cr-health-label">Sin datos</span></div>';
+  const colors = { success: 'var(--success)', amber: 'var(--amber)', danger: 'var(--danger)' };
+  const color  = colors[health.color] || 'var(--muted)';
+  return `
+  <div class="cr-health" title="${health.reasons?.join(', ') || ''}">
+    <span class="cr-health-score" style="color:${color}">${health.score}</span>
+    <span class="cr-health-label" style="color:${color}">${health.label}</span>
+  </div>`;
+}
+
+// ── STATUS CLASS ──────────────────────────────────────────────
+function getStatusClass(alerts, health) {
+  if (alerts?.some(a => a.type === 'critical')) return 'status-danger';
+  if (alerts?.some(a => a.type === 'warning'))  return 'status-warn';
+  if (health?.score >= 80) return 'status-ok';
+  if (health?.score < 50)  return 'status-blue';
+  return 'status-ok';
+}
+
+// ── RENDER DASHBOARD ──────────────────────────────────────────
+async function loadDashboard() {
+  document.getElementById('dashClients').innerHTML = '<div class="empty"><div class="spin" style="margin:0 auto"></div></div>';
+  document.getElementById('dashAlerts').innerHTML  = '';
+
+  try {
+    dashData = await api('GET', '/api/dashboard');
+    renderDashboard();
+    const now = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' });
+    document.getElementById('topbarSub').textContent = `Actualizado ${now}`;
+  } catch(e) {
+    document.getElementById('dashClients').innerHTML = '<div class="empty"><div class="empty-ico">⚠️</div><p>Error cargando datos</p></div>';
+  }
+}
+
+function renderDashboard() {
+  if (!Array.isArray(dashData) || dashData.length === 0) {
+    document.getElementById('dashAlerts').innerHTML  = '';
+    document.getElementById('dashClients').innerHTML = '<div class="empty"><div class="empty-ico">👥</div><p>No hay clientes activos.</p></div>';
+    return;
+  }
+
+  // Alertas críticas globales
+  const criticals = dashData.filter(d => d.alerts?.some(a => a.type === 'critical'));
+  document.getElementById('dashAlerts').innerHTML = criticals.length > 0 ? `
+    <div class="card" style="border-color:var(--danger-border);margin-bottom:1rem">
+      <div class="card-title" style="color:var(--danger)">⚠ ${criticals.length} cliente${criticals.length > 1 ? 's' : ''} con alertas críticas</div>
+      ${criticals.map(d => `
+        <div class="alert-item alert-critical">
+          <span style="font-weight:700">${d.client.name}:</span>
+          ${d.alerts.filter(a => a.type === 'critical').map(a => a.msg).join(' · ')}
+        </div>`).join('')}
+    </div>` : '';
+
+  document.getElementById('dashClients').innerHTML =
+    `<div class="clients-wrap">${dashData.map(d => renderClientRow(d)).join('')}</div>`;
+}
+
+function renderClientRow({ client, metrics, alerts, health, forecast, error }) {
+  const statusClass = getStatusClass(alerts, health);
+  const type        = client.client_type || 'general';
+  const typeLabels  = { ecommerce: 'eCommerce', leads: 'Leads', general: 'General' };
+  const typeBadges  = { ecommerce: 'badge-blue', leads: 'badge-purple', general: 'badge-off' };
+
+  const statusBadge = alerts?.some(a => a.type === 'critical')
+    ? '<span class="badge badge-danger">Alerta</span>'
+    : alerts?.some(a => a.type === 'warning')
+    ? '<span class="badge badge-warn">Atención</span>'
+    : '<span class="badge badge-ok">Normal</span>';
+
+  if (error) {
+    return `
+    <div class="client-row status-danger">
+      <div class="cr-top">
+        <div class="cr-name-block">
+          <div class="cr-name">${client.name}</div>
+          <div class="cr-account">${client.ad_account_id}</div>
+          <div class="cr-badges"><span class="badge badge-danger">Error</span></div>
+        </div>
+      </div>
+      <div class="alert-item alert-critical">${error}</div>
+    </div>`;
+  }
+
+  return `
+  <div class="client-row ${statusClass}">
+    <div class="cr-top">
+      <div class="cr-name-block">
+        <div class="cr-name">${client.name}</div>
+        <div class="cr-account">${client.ad_account_id}</div>
+        <div class="cr-badges">
+          ${statusBadge}
+          <span class="badge ${typeBadges[type]}">${typeLabels[type]}</span>
+          <span class="badge badge-blue">${client.currency}</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        ${buildHealthBadge(health)}
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <button class="btn-ghost btn-xs" onclick="openClientModal('${client.id}')">✏ Editar</button>
+          <button class="btn-danger btn-xs" onclick="confirmDelete('${client.id}','${client.name}')">✕ Eliminar</button>
+        </div>
+      </div>
+    </div>
+
+    ${buildPacingBlock(client, metrics)}
+    ${buildMetricsBlock(client, metrics)}
+    ${buildGoalsBlock(client, metrics)}
+    ${buildCompareBlock(client, metrics)}
+    ${buildSparkline(metrics?.dailySpend)}
+    ${buildForecastBlock(forecast, client)}
+
+    ${alerts?.length > 0 ? `
+    <div class="cr-alerts">
+      ${alerts.map(a => `<div class="alert-item alert-${a.type}">${a.msg}</div>`).join('')}
+    </div>` : ''}
+  </div>`;
+}
+
+// ── CLIENTES LIST ─────────────────────────────────────────────
+async function loadClientsList() {
+  document.getElementById('clientsList').innerHTML = '<div class="empty"><div class="spin" style="margin:0 auto"></div></div>';
+  try {
+    const clients = await api('GET', '/api/clients');
+    const typeLabels = { ecommerce: 'eCommerce', leads: 'Leads', general: 'General' };
+    if (!clients.length) {
+      document.getElementById('clientsList').innerHTML = '<div class="empty"><div class="empty-ico">👥</div><p>No hay clientes todavía.</p></div>';
+      return;
+    }
+    document.getElementById('clientsList').innerHTML = `
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="htable">
+          <thead><tr><th>Cliente</th><th>Ad Account ID</th><th>Tipo</th><th>Presupuesto</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody>
+            ${clients.map(c => `
+              <tr>
+                <td><div style="font-weight:600">${c.name}</div>${c.notes ? `<div style="font-size:11px;color:var(--muted)">${c.notes}</div>` : ''}</td>
+                <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)">${c.ad_account_id}</td>
+                <td><span class="badge badge-blue">${typeLabels[c.client_type] || 'General'}</span></td>
+                <td>${c.monthly_budget > 0 ? fmtMoney(c.monthly_budget, c.currency) : '<span style="color:var(--muted)">—</span>'}</td>
+                <td>${c.active ? '<span class="badge badge-ok">Activo</span>' : '<span class="badge badge-off">Inactivo</span>'}</td>
+                <td><div style="display:flex;gap:6px">
+                  <button class="btn-ghost btn-xs" onclick="openClientModal('${c.id}')">✏ Editar</button>
+                  <button class="btn-danger btn-xs" onclick="confirmDelete('${c.id}','${c.name}')">✕</button>
+                </div></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  } catch(e) {
+    document.getElementById('clientsList').innerHTML = '<div class="empty">Error cargando clientes</div>';
+  }
+}
+
+// ── MODAL ─────────────────────────────────────────────────────
+function onTypeChange() {
+  const type = document.getElementById('cType').value;
+  document.getElementById('goalsEcommerce').style.display = type === 'ecommerce' ? '' : 'none';
+  document.getElementById('goalsLeads').style.display     = type === 'leads'     ? '' : 'none';
+}
+
+async function openClientModal(id) {
+  document.getElementById('editId').value        = id || '';
+  document.getElementById('modalTitle').textContent = id ? 'Editar cliente' : 'Agregar cliente';
+  document.getElementById('cName').value         = '';
+  document.getElementById('cAccount').value      = '';
+  document.getElementById('cBudget').value       = '';
+  document.getElementById('cCurrency').value     = 'ARS';
+  document.getElementById('cType').value         = 'general';
+  document.getElementById('cNotes').value        = '';
+  document.getElementById('cActive').className   = 'toggle on';
+  document.getElementById('cTargetRoas').value   = '';
+  document.getElementById('cTargetRevenue').value = '';
+  document.getElementById('cTargetCpl').value    = '';
+  document.getElementById('cTargetLeads').value  = '';
+  onTypeChange();
+
+  if (id) {
+    try {
+      const clients = await api('GET', '/api/clients');
+      const c = clients.find(x => x.id == id);
+      if (c) {
+        document.getElementById('cName').value          = c.name || '';
+        document.getElementById('cAccount').value       = c.ad_account_id || '';
+        document.getElementById('cBudget').value        = c.monthly_budget || '';
+        document.getElementById('cCurrency').value      = c.currency || 'ARS';
+        document.getElementById('cType').value          = c.client_type || 'general';
+        document.getElementById('cNotes').value         = c.notes || '';
+        document.getElementById('cActive').className    = 'toggle' + (c.active !== false ? ' on' : '');
+        document.getElementById('cTargetRoas').value    = c.target_roas || '';
+        document.getElementById('cTargetRevenue').value = c.target_revenue || '';
+        document.getElementById('cTargetCpl').value     = c.target_cpl || '';
+        document.getElementById('cTargetLeads').value   = c.target_leads || '';
+        onTypeChange();
+      }
+    } catch(e) {}
+  }
+  document.getElementById('clientModal').classList.add('on');
+}
+
+function closeModal() {
+  document.getElementById('clientModal').classList.remove('on');
+}
+
+async function saveClient() {
+  const id      = document.getElementById('editId').value;
+  const name    = document.getElementById('cName').value.trim();
+  const acct    = document.getElementById('cAccount').value.trim();
+  const budget  = document.getElementById('cBudget').value;
+  const cur     = document.getElementById('cCurrency').value;
+  const type    = document.getElementById('cType').value;
+  const notes   = document.getElementById('cNotes').value.trim();
+  const active  = document.getElementById('cActive').classList.contains('on');
+  const tRoas   = document.getElementById('cTargetRoas').value;
+  const tRev    = document.getElementById('cTargetRevenue').value;
+  const tCpl    = document.getElementById('cTargetCpl').value;
+  const tLeads  = document.getElementById('cTargetLeads').value;
+
+  if (!name || !acct) return toast('Nombre y Ad Account ID son requeridos', 'err');
+
+  const body = {
+    name, ad_account_id: acct,
+    monthly_budget: parseFloat(budget) || 0,
+    currency: cur, notes, active,
+    client_type: type,
+    target_roas:    tRoas    ? parseFloat(tRoas)    : null,
+    target_revenue: tRev     ? parseFloat(tRev)     : null,
+    target_cpl:     tCpl     ? parseFloat(tCpl)     : null,
+    target_leads:   tLeads   ? parseInt(tLeads)     : null,
+  };
+
+  try {
+    if (id) await api('PUT', `/api/clients/${id}`, body);
+    else     await api('POST', '/api/clients', body);
+    closeModal();
+    toast('Cliente guardado ✓', 'ok');
+    loadClientsList();
+    loadDashboard();
+  } catch(e) { toast('Error guardando cliente', 'err'); }
+}
+
+async function confirmDelete(id, name) {
+  if (!confirm(`¿Eliminar a "${name}"?`)) return;
+  try {
+    await api('DELETE', `/api/clients/${id}`);
+    toast('Cliente eliminado', 'ok');
+    loadClientsList();
+    loadDashboard();
+  } catch(e) { toast('Error eliminando cliente', 'err'); }
+}
+
+// ── SETTINGS ─────────────────────────────────────────────────
+function populateHourSelects() {
+  const hours = [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+  ['daily-hour','weekly-hour','monthly-hour'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    sel.innerHTML = hours.map(h => `<option value="${h}" ${h===9?'selected':''}>${String(h).padStart(2,'0')}:00 hs</option>`).join('');
+  });
+  const daysSel = document.getElementById('monthly-day');
+  if (daysSel) daysSel.innerHTML = Array.from({length:28},(_,i) => `<option value="${i+1}" ${i===0?'selected':''}>${i+1}</option>`).join('');
+}
+
+async function loadSettings() {
+  try {
+    populateHourSelects();
+    settingsData = await api('GET', '/api/settings');
+    emailList = settingsData.recipients || [];
+    renderEmailTags();
+    const sched = settingsData.schedule || {};
+    ['daily','weekly','monthly'].forEach(type => {
+      const tog = document.getElementById(`tog-${type}`);
+      if (sched[type]?.enabled) tog.classList.add('on');
+      else tog.classList.remove('on');
+    });
+    if (sched.daily?.hour   != null) document.getElementById('daily-hour').value   = sched.daily.hour;
+    if (sched.weekly?.hour  != null) document.getElementById('weekly-hour').value  = sched.weekly.hour;
+    if (sched.weekly?.dow   != null) document.getElementById('weekly-dow').value   = sched.weekly.dow;
+    if (sched.monthly?.hour != null) document.getElementById('monthly-hour').value = sched.monthly.hour;
+    if (sched.monthly?.day  != null) document.getElementById('monthly-day').value  = sched.monthly.day;
+  } catch(e) { toast('Error cargando ajustes', 'err'); }
+}
+
+function addEmail() {
+  const input = document.getElementById('emailInput');
+  const email = input.value.trim();
+  if (!email || !email.includes('@')) return;
+  if (!emailList.includes(email)) emailList.push(email);
+  input.value = '';
+  renderEmailTags();
+}
+
+function removeEmail(email) {
+  emailList = emailList.filter(e => e !== email);
+  renderEmailTags();
+}
+
+function renderEmailTags() {
+  document.getElementById('emailTags').innerHTML = emailList.map(e =>
+    `<span class="etag">${e}<button onclick="removeEmail('${e}')">×</button></span>`
+  ).join('');
+}
+
+async function saveSettings() {
+  const settings = {
+    recipients: emailList,
+    schedule: {
+      daily:   { enabled: document.getElementById('tog-daily').classList.contains('on'),   hour: parseInt(document.getElementById('daily-hour').value) },
+      weekly:  { enabled: document.getElementById('tog-weekly').classList.contains('on'),  hour: parseInt(document.getElementById('weekly-hour').value), dow: parseInt(document.getElementById('weekly-dow').value) },
+      monthly: { enabled: document.getElementById('tog-monthly').classList.contains('on'), hour: parseInt(document.getElementById('monthly-hour').value), day: parseInt(document.getElementById('monthly-day').value) },
+    }
+  };
+  try {
+    await api('PUT', '/api/settings', settings);
+    settingsData = settings;
+    toast('Ajustes guardados ✓', 'ok');
+  } catch(e) { toast('Error guardando ajustes', 'err'); }
+}
+
+async function sendTest(type) {
+  toast('Enviando reporte...', 'info');
+  try {
+    const r = await api('POST', '/api/send-test', { type });
+    if (r.ok) toast(`Reporte ${type} enviado a ${r.sent} destinatario/s ✓`, 'ok');
+    else toast(`Error: ${r.error}`, 'err');
+  } catch(e) { toast('Error enviando reporte', 'err'); }
+}
+
+// ── HISTORIAL ─────────────────────────────────────────────────
+async function loadHistory() {
+  try {
+    const history = await api('GET', '/api/history');
+    if (!history.length) {
+      document.getElementById('historyBody').innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--muted)">Sin historial todavía</td></tr>';
+      return;
+    }
+    const typeLabels = { daily: 'Diario', weekly: 'Semanal', monthly: 'Mensual' };
+    document.getElementById('historyBody').innerHTML = history.map(h => `
+      <tr>
+        <td>${new Date(h.sent_at).toLocaleString('es-AR', { day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'America/Argentina/Buenos_Aires' })}</td>
+        <td><span class="badge badge-blue">${typeLabels[h.type] || h.type}</span></td>
+        <td>${h.clients_count}</td>
+        <td>${h.alerts_count > 0 ? `<span style="color:var(--amber);font-weight:700">${h.alerts_count}</span>` : '<span style="color:var(--success)">0</span>'}</td>
+        <td>${h.recipients}</td>
+      </tr>`).join('');
+  } catch(e) {
+    document.getElementById('historyBody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted)">Error</td></tr>';
+  }
+}
+
+// ── TOAST ─────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg, type = 'ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast ${type} on`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('on'), 3500);
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
