@@ -500,7 +500,7 @@ async function doLogin() {
 }
 
 // Auto-login si hay token guardado en sesión
-(async () => {
+document.addEventListener('DOMContentLoaded', async () => {
   if (JWT_TOKEN) {
     const test = await fetch('/api/history', { headers: { 'Authorization': 'Bearer ' + JWT_TOKEN } });
     if (test.status === 200) {
@@ -513,7 +513,7 @@ async function doLogin() {
     JWT_TOKEN = '';
     sessionStorage.removeItem('mbm_token');
   }
-})();
+});
 
 document.getElementById('loginPwd').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
